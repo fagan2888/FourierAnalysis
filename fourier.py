@@ -41,6 +41,7 @@ class fourier:
         plt.plot(xf1,yf1)
         plt.title('original signal fast fourier transferred')
 
+        plt.show()
 
 
 if __name__ == '__main__':
