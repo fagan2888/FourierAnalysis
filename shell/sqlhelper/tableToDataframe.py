@@ -28,7 +28,7 @@ def toSQL(key):
     return sql
 
 
-def toDf(key, sql, parse_dates):
+def toDf(key, sql, parse_dates = ''):
 
     # connect to database
     if key in uris.keys():
@@ -39,7 +39,7 @@ def toDf(key, sql, parse_dates):
         return -1
 
     if parse_dates:
-        df = pd.read_sql(sql, engine, parse_dates = dates)
+        df = pd.read_sql(sql, engine, parse_dates)
     else:
         df = pd.read_sql(sql, engine)
 

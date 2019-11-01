@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 from ipdb import set_trace
-from sqlhelper import 
+from sqlhelper import *
 
 
 
