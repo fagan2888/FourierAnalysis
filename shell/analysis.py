@@ -50,6 +50,18 @@ def analysis():
     sz399001Monthly.to_excel(excel, sheet_name = '深证综指月频')
     excel.save()
 
+    # fourier analysis
+    def fourier(y):
+        plt.plot(y)
+        set_trace()
+        fy = abs(fft(y))
+        plt.plot(fy)
+    
+    sh000001Monthly = pd.read_excel('monthly.xlsx',index_col = 0, sheet_name = '上证综指月频')
+    sz399001Monthly = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
+    fourier(sh000001Monthly['S_DQ_CHANGE'])
+    fourier(sz399001Monthly['S_DQ_CHANGE'])
+
 if __name__ ==  '__main__':
     analysis()
 
