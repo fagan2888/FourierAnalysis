@@ -61,6 +61,7 @@ def analysis():
 
     # change data to monthly data
     def toMonthly(df, dates):
+        df[dates] = df[dates].apply(lambda x: pd.Timestamp(x).strftime('%Y-%m-%d'))
         bools = df[dates].str.endswith('-01')
         mask = df[bools]
         return mask
