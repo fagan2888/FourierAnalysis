@@ -62,11 +62,25 @@ if __name__ == '__main__':
        
     k = 0
     for i in stock.columns.values:    
-        y = stock[i]
+        y = stock['上证综指']
+        plt.plot(y)
+        # 傅里叶变换振幅
         fy = abs(fft(y))
-        fy = fy[0:len(fy)]
+        fy = fy[0:len(fy)//2]
+        # 傅里叶变换功率
+        power = abs(np.square(fft(y)))
+        power = power[0:len(power)//2]
+        # 傅里叶变换频率 周期
+        # 最高频率为 1/2 最低频率为 2/nfft 
+        # nfft为采样周期
+        nfft = len(y)
+        nyquist = 1/2 
+        freq = [nyquist*i/np.floor(nfft/2) for i in range(1,int(np.floor(nfft/2)+1))]
+        freq = np.array(freq)
+        period = 1/freq
         #k += 1
         #plt.figure(k)
-        plt.plot(fy)
+        plt.plot(period,fy)
+        plt.plot(period,power)
         #plt.title(i)
     

@@ -82,8 +82,10 @@ def analysis():
 
     # fourier analysis
     def fourier(y):
+        plt.figure(0)
         plt.plot(y)
         fy = abs(fft(y))
+        plt.figure(1)
         plt.plot(fy)
     
 #    sh000001Monthly = pd.read_excel('monthly.xlsx',index_col = 0, sheet_name = '上证综指月频')
@@ -122,6 +124,38 @@ def analysis():
     df1.to_excel(excel, sheet_name = '上证综指月频')
     df2.to_excel(excel, sheet_name = '深证综指月频')
     excel.save()
+    
+    sh000001Monthly = pd.read_excel('monthly_part.xlsx',index_col = 0, sheet_name = '上证综指月频')
+    sz399001Monthly = pd.read_excel('monthly_part.xlsx', index_col = 0, sheet_name = '深证综指月频')
+    
+    # 傅里叶变换振幅
+    fy = abs(fft(y))
+    fy = fy[0:len(fy)//2]
+    # 傅里叶变换功率
+    power = abs(np.square(fft(y)))
+    power = power[0:len(power)//2]
+    # 傅里叶变换频率 周期
+    # 最高频率为 1/2 最低频率为 2/nfft 
+    # nfft为采样周期
+    nfft = len(y)
+    nyquist = 1/2 
+    freq = [nyquist*i/np.floor(nfft/2) for i in range(1,int(np.floor(nfft/2)+1))]
+    freq = np.array(freq)
+    period = 1/freq
+
+    plt.plot(period,fy)
+    plt.plot(period,power)
+
+        
+    # 环比数据
+    plt.plot(sh000001Monthly['TRADE_DT'],sh000001Monthly['S_DQ_CHANGE'])
+    plt.plot(abs(fft(sh000001Monthly['S_DQ_CHANGE'])))
+    
+ 
+    # 同比数据
+    plt.plot(sh000001Monthly['TRADE_DT'],sh000001Monthly['YEAR_ON_YEAR_RETURN'])
+    plt.plot(abs(fft(sh000001Monthly['YEAR_ON_YEAR_RETURN'])))
+    
 
 
 if __name__ ==  '__main__':
