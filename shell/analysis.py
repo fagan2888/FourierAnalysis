@@ -90,27 +90,35 @@ def analysis():
 #    sz399001Monthly = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
 #    fourier(sh000001Monthly['S_DQ_CHANGE'])
 #    fourier(sz399001Monthly['S_DQ_CHANGE'])
+#    df1 = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '上证综指月频')
+#    df2 = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
+#
+#    # calculate year-on-year data
+#    def yearOnYear(df,values, dates):
+#        df = df.sort_values(dates)
+#        df = df.reset_index(drop = True)
+#        df['YEAR_ON_YEAR_RETURN'] = 0.0
+#        for i in range(len(df)-12):
+#            df['YEAR_ON_YEAR_RETURN'][i+12] = df.iloc[i+12][values] / df.iloc[i][values] - 1
+#        return df
+#
+#    df1 = yearOnYear(df1, 'S_DQ_CLOSE', 'TRADE_DT')
+#    df2 = yearOnYear(df2, 'S_DQ_CLOSE', 'TRADE_DT')
+#
+#    # save monthly data with year-on-year rate
+#    excel = pd.ExcelWriter('monthly.xlsx')
+#    df1.to_excel(excel, sheet_name = '上证综指月频')
+#    df2.to_excel(excel, sheet_name = '深证综指月频')
+#    excel.save()
+
+    # select data
     df1 = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '上证综指月频')
     df2 = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
-
-    # calculate year-on-year data
-    def yearOnYear(df,values, dates):
-        df = df.sort_values(dates)
-        df = df.reset_index(drop = True)
-        df['YEAR_ON_YEAR_RETURN'] = 0.0
-        for i in range(len(df)-12):
-            df['YEAR_ON_YEAR_RETURN'][i+12] = df.iloc[i+12][values] / df.iloc[i][values] - 1
-        return df
-
-    df1 = yearOnYear(df1, 'S_DQ_CLOSE', 'TRADE_DT')
-    print(df1)
-    set_trace()
-    df2 = yearOnYear(df2, 'S_DQ_CLOSE', 'TRADE_DT')
-    print(df2)
-    set_trace()
-
-    # save monthly data with year-on-year rate
-    excel = pd.ExcelWriter('monthly.xlsx')
+    df1['TRADE_DT'] = df1['TRADE_DT'].apply(lambda x: pd.Timestamp(x).strftime('%Y-%m-%d'))
+    df2['TRADE_DT'] = df2['TRADE_DT'].apply(lambda x: pd.Timestamp(x).strftime('%Y-%m-%d'))
+    df1 = df1[df1['TRADE_DT']>'1996-01-01']
+    df2 = df2[df2['TRADE_DT']>'1996-01-01']
+    excel =  pd.ExcelWriter('monthly_part.xlsx')
     df1.to_excel(excel, sheet_name = '上证综指月频')
     df2.to_excel(excel, sheet_name = '深证综指月频')
     excel.save()
