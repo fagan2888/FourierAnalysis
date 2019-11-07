@@ -86,19 +86,6 @@ def analysis():
 #    sz399001Monthly.to_excel(excel, sheet_name = '深证综指月频')
 #    excel.save()
 
-    # fourier analysis
-    def fourier(y):
-        plt.figure(0)
-        plt.plot(y)
-        fy = abs(fft(y))
-        plt.figure(1)
-        plt.plot(fy)
-    
-#    sh000001Monthly = pd.read_excel('monthly.xlsx',index_col = 0, sheet_name = '上证综指月频')
-#    sz399001Monthly = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
-#    fourier(sh000001Monthly['S_DQ_CHANGE'])
-#    fourier(sz399001Monthly['S_DQ_CHANGE'])
-
     # calculate year-on-year data
     def yearOnYear(df,values, dates, newname = 'YEAR_ON_YEAR_RETURN', steps = 12):
         df = df.sort_values(dates)
@@ -133,9 +120,7 @@ def analysis():
     df1.to_excel(excel, sheet_name = '上证综指日频')
     df2.to_excel(excel, sheet_name = '深证综指日频')
     excel.save()
-    print('ok')
-    set_trace()
-
+    
     # select data
     df1 = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '上证综指月频')
     df2 = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
@@ -148,9 +133,22 @@ def analysis():
     df2.to_excel(excel, sheet_name = '深证综指月频')
     excel.save()
     
+    # load data for fourier analysis
     sh000001Monthly = pd.read_excel('monthly_part.xlsx',index_col = 0, sheet_name = '上证综指月频')
     sz399001Monthly = pd.read_excel('monthly_part.xlsx', index_col = 0, sheet_name = '深证综指月频')
+    y = sh000001Monthly['YEAR_ON_YEAR_RETURN']
+    y = sz399001Monthly['YEAR_ON_YEAR_RETURN']
     
+    sh000001daily = pd.read_excel('daily.xlsx',index_col = 0, sheet_name = '上证综指日频')
+    sz399001daily = pd.read_excel('daily.xlsx', index_col = 0, sheet_name = '深证综指日频')
+    y = sh000001daily['WEEK_ON_WEEK_RETURN']
+    y = sz399001daily['WEEK_ON_WEEK_RETURN']
+    y = sh000001daily['MONTH_ON_MONTH_RETURN']
+    y = sz399001daily['MONTH_ON_MONTH_RETURN']
+    y = sh000001daily['YEAR_ON_YEAR_RETURN']
+    y = sz399001daily['YEAR_ON_YEAR_RETURN']
+    
+    # fourier analysis
     # 傅里叶变换振幅
     fy = abs(fft(y))
     fy = fy[0:len(fy)//2]
@@ -168,18 +166,51 @@ def analysis():
 
     plt.plot(period,fy)
     plt.plot(period,power)
-
+    
+    df = pd.DataFrame(columns = ['position', 'value'])
+    df['position'] = period
+    df['value'] = fy
+    df = df[df['position']<150]
+    
+    plt.plot(df['position'], df['value'])
+    
+    
+    # find the top/bottom n points
+    def tpoint(x, y, n = 3, choice = 'max'):
+        df = pd.DataFrame(columns = ['position', 'value'])
+        df['position'] = x
+        df['value'] = y
         
-    # 环比数据
-    plt.plot(sh000001Monthly['TRADE_DT'],sh000001Monthly['S_DQ_CHANGE'])
-    plt.plot(abs(fft(sh000001Monthly['S_DQ_CHANGE'])))
-    
- 
-    # 同比数据
-    plt.plot(sh000001Monthly['TRADE_DT'],sh000001Monthly['YEAR_ON_YEAR_RETURN'])
-    plt.plot(abs(fft(sh000001Monthly['YEAR_ON_YEAR_RETURN'])))
-    
+        if choice == 'max':
+            df.sort_values(by = 'value', ascending = False, inplace = True)
+        else:
+            df.sort_values(by = 'value', ascending = True, inplace = True)
 
+        outDf = df.iloc[0:n,:]
+        outDf.sort_values(by = 'value', inplace = True)
+        outDf.reset_index(drop = True, inplace = True)
+        
+        return outDf
+
+    out1 = tpoint(df['position'], df['value'], n = 10)
+    out2 = tpoint(period,power, n = 10)
+
+    # using mean value to make the curve smooth
+    def movingAverage(value, T):
+        newValue = list()
+        for i in range(T):
+            newValue.append(value[i])
+            
+        for i in range(T, len(value)):
+            newValue.append(sum(value[i-T:i]) / T)
+        
+        return newValue
+    
+    newFy = movingAverage(fy, 30)
+    newPpower = movingAverage(power, 30)
+    
+    plt.plot(period, newFy)
+    plt.plot(period, newPower)
 
 if __name__ ==  '__main__':
     analysis()
