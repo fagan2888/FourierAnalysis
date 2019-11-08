@@ -136,19 +136,43 @@ def analysis():
     excel.save()
     
     # load data for fourier analysis
+    sh000001Monthly = pd.read_excel('monthly.xlsx',index_col = 0, sheet_name = '上证综指月频')
+    sz399001Monthly = pd.read_excel('monthly.xlsx', index_col = 0, sheet_name = '深证综指月频')
     sh000001Monthly = pd.read_excel('monthly_part.xlsx',index_col = 0, sheet_name = '上证综指月频')
     sz399001Monthly = pd.read_excel('monthly_part.xlsx', index_col = 0, sheet_name = '深证综指月频')
+    sh000001Monthly.TRADE_DT = sh000001Monthly.TRADE_DT.apply(lambda x: pd.Timestamp(x).strftime('%Y-%m'))
+    sz399001Monthly.TRADE_DT = sz399001Monthly.TRADE_DT.apply(lambda x: pd.Timestamp(x).strftime('%Y-%m'))
+    sh000001Monthly.set_index('TRADE_DT', inplace = True)
+    sz399001Monthly.set_index('TRADE_DT', inplace = True)
+    sh000001Monthly = sh000001Monthly.fillna(0)
+    sz399001Monthly = sz399001Monthly.fillna(0)
+    y = sh000001Monthly['S_DQ_CHANGE']
+    y = sz399001Monthly['S_DQ_CHANGE']
     y = sh000001Monthly['YEAR_ON_YEAR_RETURN']
     y = sz399001Monthly['YEAR_ON_YEAR_RETURN']
     
     sh000001daily = pd.read_excel('daily.xlsx',index_col = 0, sheet_name = '上证综指日频')
     sz399001daily = pd.read_excel('daily.xlsx', index_col = 0, sheet_name = '深证综指日频')
-    y = sh000001daily['WEEK_ON_WEEK_RETURN']
-    y = sz399001daily['WEEK_ON_WEEK_RETURN']
-    y = sh000001daily['MONTH_ON_MONTH_RETURN']
-    y = sz399001daily['MONTH_ON_MONTH_RETURN']
-    y = sh000001daily['YEAR_ON_YEAR_RETURN']
-    y = sz399001daily['YEAR_ON_YEAR_RETURN']
+    sh000001daily.TRADE_DT = sh000001daily.TRADE_DT.apply(lambda x: pd.Timestamp(x).strftime('%Y-%m-%d'))
+    sz399001daily.TRADE_DT = sz399001daily.TRADE_DT.apply(lambda x: pd.Timestamp(x).strftime('%Y-%m-%d'))
+ #   sh000001daily.set_index('TRADE_DT', inplace = True)
+ #  sz399001daily.set_index('TRADE_DT', inplace = True)
+    sh000001daily = sh000001daily.fillna(0)
+    sz399001daily = sz399001daily.fillna(0)
+    sh000001daily = sh000001daily[sh000001daily['TRADE_DT']>='1996-01-01']
+    sz399001daily = sz399001daily[sz399001daily['TRADE_DT']>='1996-01-01']
+    
+    y = sh000001daily[sh000001daily['TRADE_DT']>='2007-01-01']
+    y = y[y['TRADE_DT']<= '2019-11-09']
+    
+#    y = sh000001daily['S_DQ_CHANGE']
+#    y = sz399001daily['S_DQ_CHANGE']
+#    y = sh000001daily['WEEK_ON_WEEK_RETURN']
+#    y = sz399001daily['WEEK_ON_WEEK_RETURN']
+#    y = sh000001daily['MONTH_ON_MONTH_RETURN']
+#    y = sz399001daily['MONTH_ON_MONTH_RETURN']
+    y = y['YEAR_ON_YEAR_RETURN']
+#    y = sz399001daily['YEAR_ON_YEAR_RETURN']
     
     # fourier analysis
     # 傅里叶变换振幅
@@ -165,14 +189,10 @@ def analysis():
     freq = [nyquist*i/np.floor(nfft/2) for i in range(1,int(np.floor(nfft/2)+1))]
     freq = np.array(freq)
     period = 1/freq
-
-    plt.plot(period,fy)
-    plt.plot(period,power)
     
     df = pd.DataFrame(columns = ['position', 'value'])
     df['position'] = period
     df['value'] = fy
-    df = df[df['position']<150]
     
     plt.plot(df['position'], df['value'])
     
