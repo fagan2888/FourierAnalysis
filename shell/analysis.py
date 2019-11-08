@@ -59,6 +59,8 @@ def analysis():
     sh000001 = fullfill(sh000001)
     sz399001 = fullfill(sz399001)
     h11007 = fullfill(h11007)
+    sh000001.S_DQ_CHANGE = sh000001.S_DQ_CLOSE.pct_change()
+    sz399001.S_DQ_CHANGE = sz399001.S_DQ_CLOSE.pct_change()
 
     # save daily data
     excel = pd.ExcelWriter('daily.xlsx')
